@@ -15,7 +15,7 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({
-      iconUrl: '',
+      iconUrl: 'https://raw.githubusercontent.com/LinkTheCoder/PomPomDoro/main/images/icon.ico',
       setupIcon: './images/icon.ico',
     }), 
     new MakerZIP({}, ['darwin']), 
