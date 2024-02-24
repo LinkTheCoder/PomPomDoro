@@ -1,14 +1,20 @@
-// renderer.ts
-let timerInterval: any;
-let timerDisplay: HTMLElement | null;
-let startButton: HTMLElement | null;
-let resetButton: HTMLElement | null;
-let taskInput: HTMLInputElement | null;
-let addTaskBtn: HTMLElement | null;
-let tasksList: HTMLElement | null;
+let timerInterval: string | number | NodeJS.Timeout;
+let timerDisplay: HTMLElement;
+let startButton;
+let resetButton;
+let taskInput: HTMLElement;
+let addTaskBtn;
+let tasksList: HTMLElement;
 let isRunning = false;
 let minutes = 25;
 let seconds = 0;
+let pomodoroCount = 0;
+
+const NOTIFICATION_TITLE = 'PomPomDoro';
+const NOTIFICATION_BODY_SHORT_BREAK = '🐶 BARK! Time for a short break!';
+const NOTIFICATION_BODY_LONG_BREAK = '🐶 BARK! Time for a longer break!';
+const NOTIFICATION_BODY_NEXT_SESSION = '🐶 BARK! Time to start your next pom pom session!';
+const CLICK_MESSAGE = '🐶 BARK!';
 
 function startTimer() {
   isRunning = true;
@@ -17,7 +23,23 @@ function startTimer() {
       if (minutes === 0) {
         clearInterval(timerInterval);
         isRunning = false;
-        alert("Pomodoro completed!");
+        pomodoroCount++;
+        if (pomodoroCount % 4 === 0) {
+          // Take a longer break after every 4 pomodoros
+          showNotification(NOTIFICATION_TITLE, NOTIFICATION_BODY_LONG_BREAK);
+          minutes = 20; // Longer break duration set to 20 minutes
+        } else {
+          // Take a short break after every pomodoro session
+          showNotification(NOTIFICATION_TITLE, NOTIFICATION_BODY_SHORT_BREAK);
+          minutes = 5; // Short break duration
+        }
+        seconds = 0;
+        displayTime();
+        setTimeout(() => {
+          // Notification to start the next Pomodoro session after the break
+          showNotification(NOTIFICATION_TITLE, NOTIFICATION_BODY_NEXT_SESSION);
+          startTimer(); // Start the next Pomodoro session
+        }, minutes * 60 * 1000); // Delay before starting the next session
       } else {
         minutes--;
         seconds = 59;
@@ -34,6 +56,7 @@ function resetTimer() {
   isRunning = false;
   minutes = 25;
   seconds = 0;
+  pomodoroCount = 0;
   displayTime();
 }
 
@@ -44,7 +67,8 @@ function displayTime() {
 }
 
 function addTask() {
-  if (taskInput && taskInput.value.trim() !== '') {
+  if (taskInput && (taskInput as HTMLInputElement).value.trim() !== '') {
+    const taskInput = document.getElementById("taskInput") as HTMLInputElement;
     const taskText = taskInput.value.trim();
     const li = document.createElement('li');
     li.textContent = taskText.toUpperCase();
@@ -71,11 +95,16 @@ function addTask() {
   }
 }
 
+function showNotification(title: string, body: string) {
+  new Notification(title, { body: body })
+    .onclick = () => { console.log(CLICK_MESSAGE); };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   timerDisplay = document.getElementById("timer");
   startButton = document.getElementById("startBtn");
   resetButton = document.getElementById("resetBtn");
-  taskInput = document.getElementById("taskInput") as HTMLInputElement;
+  taskInput = document.getElementById("taskInput");
   addTaskBtn = document.getElementById("addTaskBtn");
   tasksList = document.getElementById("tasks");
 

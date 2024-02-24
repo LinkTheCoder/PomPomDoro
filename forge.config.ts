@@ -26,7 +26,6 @@ const config: ForgeConfig = {
       }
     })
   ],
-  
   plugins: [
     new VitePlugin({
       build: [
